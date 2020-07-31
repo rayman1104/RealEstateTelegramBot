@@ -1,0 +1,54 @@
+version: "3.7"
+
+volumes:
+  mongo_data:
+
+services:
+  all_moscow:
+    image: telegram_realty_all_moscow
+    restart: always
+    volumes:
+      - .:/source
+    depends_on:
+      - mongo
+      - rabbit
+  main:
+    image: telegram_realty_main
+    restart: always
+    volumes:
+      - .:/source
+    depends_on:
+      - mongo
+      - rabbit
+  parser:
+    image: telegram_realty_parser
+    restart: always
+    volumes:
+      - .:/source
+    depends_on:
+      - mongo
+      - rabbit
+  updates_manager:
+    image: telegram_realty_updates_manager
+    restart: always
+    volumes:
+      - .:/source
+    depends_on:
+      - mongo
+      - rabbit
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "127.0.0.1:27018:27017"
+    volumes:
+      - mongo_data:/data/db
+      # - /mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=telegram_realty_admin
+      - RABBITMQ_DEFAULT_PASS=realty_da_best

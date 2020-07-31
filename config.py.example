@@ -24,7 +24,7 @@ default_user = {'auth': False, 'received_links': [],
 invite_length = 20
 
 # Mongo
-mongo_url = 'localhost'
+mongo_url = 'mongo'
 mongo_port = 27017
 mongo_database_name = 'telegram_realty_bot_db'
 users_db = 'users'
@@ -33,7 +33,7 @@ invites_db = 'invites'
 flats_db = 'flats'
 
 # RabbitMQ
-rabbit_mq_url = 'localhost'
+rabbit_mq_url = 'rabbit'
 rabbit_mq_port = 5672
 rabbit_mq_user = 'telegram_realty_admin'
 rabbit_mq_pass = 'realty_da_best'
