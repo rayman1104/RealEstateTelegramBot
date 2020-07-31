@@ -103,7 +103,7 @@ class GlobalParser:
 
     @staticmethod
     def register():
-        QueueWrapper.clear_queue(config.parse_all_moscow_req_queue)
+        QueueWrapper.clear_queue(config.parse_all_moscow_req_queue, is_publish=True)
         GlobalParser.parse_request_function = ConsumerFactory.get_consumer(config.parse_all_moscow_req_queue,
                                                                            config.parse_all_moscow_ans_queue,
                                                                            GlobalParser.link_parsed)

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
+import logging
 
 import config
 import requests
 
 base_url = 'https://api.telegram.org/bot{api_key}/{method}'
+logger = logging.getLogger('telegram')
+logger.setLevel(logging.DEBUG)
 
 
 def request(api_key, method_name, **kwargs):
@@ -215,10 +218,16 @@ class Telegram:
         if len(r) > 0:
             self.lastUpdate = max(self.lastUpdate, max(rq['update_id'] + 1 for rq in r))
         for query in r:
+            logger.debug(f'<== {query}')
             ans = dict()
             if 'message' in query.keys():
                 ans['type'] = 'message'
                 ans['body'] = query['message']
+                if 'text' not in ans['body'].keys():
+                    ans['body']['text'] = ''
+            elif 'edited_message' in query.keys():
+                ans['type'] = 'message'
+                ans['body'] = query['edited_message']
                 if 'text' not in ans['body'].keys():
                     ans['body']['text'] = ''
             elif 'inline_query' in query.keys():

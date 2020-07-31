@@ -77,7 +77,7 @@ def offer_info_class_lambda(x):
 
 
 timezone = pytz.timezone('Europe/Moscow')
-months = ["январь", "февраль", "март", "апрель", "май",
+months = ["январь", "февраль", "март", "апрель", "мая",
           "июнь", "июль", "август", "сентябрь", "октябрь",
           "ноябрь", "декабрь"]
 
@@ -227,6 +227,8 @@ def get_new_offers(url, time=config.cian_default_timeout):
     db = Databases.get_flats_db()
     ids = {}
     for offer in get_offers(url, time):
+        if offer is None:
+            continue
         if offer['id'] in ids.keys():
             old = ids[offer['id']]
             old = old.copy()
@@ -251,7 +253,10 @@ def get_count_of_offers(page_bs):
             f.write(str(page_bs))
         logger.warning("Wrong page_bs. Saved as wrong_bs.pkl")
     assert count_entry is not None
-    count = count_re.match(count_entry).groups()[0]
+    match = count_re.match(count_entry)
+    if match is None:
+        return 0
+    count = match.groups()[0]
     return int(count)
 
 

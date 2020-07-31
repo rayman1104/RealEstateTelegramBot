@@ -50,7 +50,7 @@ class User:
         self._links = list(LinksDBManager.get_user_links(user_id))
         self._max_price = data['max_price']
         self._metro_stations = set(data['metro_stations'])
-        self._menu_message = data['menu_message_id']
+        self._menu_message = data.get('menu_message_id')
 
         self.raw_callback = callback
         self.callback = User.UserCallback(self)

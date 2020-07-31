@@ -25,5 +25,5 @@ class ConsumerFactory:
 
         QueueWrapper.subscribe_to_queue(callback=raw_answer_callback,
                                         queue=answer_queue_name,
-                                        no_ack=False)
+                                        auto_ack=False)
         return write_msg

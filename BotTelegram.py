@@ -23,21 +23,25 @@ if __name__ == "__main__":
         while True:
             logger.debug("Getting updates")
             for query in bot.get_updates(timeout=30):
-                type = query['type']
+                logger.debug(f'==> {query}')
+                query_type = query['type']
                 body = query['body']
                 user_id = query['uid']
                 user = UserManager.get_or_create_user(user_id)
-                if type == 'message':
+                if query_type == 'message':
                     logger.debug("Sending message to user {}".format(user_id))
                     user.process_message(body)
-                elif type == 'inline_req':
+                elif query_type == 'inline_req':
                     logger.debug("Sending inline request to user {}".format(user_id))
                     user.process_inline_req(body)
-                elif type == 'inline_ans':
+                elif query_type == 'inline_ans':
                     logger.debug("Sending inline answer to user {}".format(user_id))
                     user.process_inline_ans(body)
-                elif type == 'callback':
+                elif query_type == 'callback':
                     logger.debug("Sending callback to user {}".format(user_id))
                     user.process_callback(body)
     except KeyboardInterrupt:
+        logger.debug('QueueWrapper.close')
         QueueWrapper.close()
+    except Exception as e:
+        logger.error('Fatal error in main loop', exc_info=True)

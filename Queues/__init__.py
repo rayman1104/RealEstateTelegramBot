@@ -1,28 +1,34 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+from typing import Set
 
 import config
 import pika
 import threading
+from pika.adapters.blocking_connection import BlockingChannel
 
 logger = logging.getLogger("QueueWrapper")
 
 
 class QueueWrapper:
-    connection = None
-    channel = None
-    existing_queues = None
-    existing_queues_lock = None
+    params: pika.URLParameters = None
+    connection: pika.BlockingConnection = None
+    channel: BlockingChannel = None
+    publish_channel: BlockingChannel = None
+    existing_queues: Set[str] = None
+    existing_queues_lock: threading.Lock = None
     consume_thread = None
 
     @staticmethod
     def init():
         logger.info("Initializing queue manager")
         base = "amqp://{username}:{password}@{host}:{port}"
-        params = pika.URLParameters(base.format(username=config.rabbit_mq_user, password=config.rabbit_mq_pass,
-                                                host=config.rabbit_mq_url, port=config.rabbit_mq_port))
-        QueueWrapper.connection = pika.BlockingConnection(params)
+        QueueWrapper.params = pika.URLParameters(base.format(username=config.rabbit_mq_user,
+                                                             password=config.rabbit_mq_pass,
+                                                             host=config.rabbit_mq_url,
+                                                             port=config.rabbit_mq_port))
+        QueueWrapper.connection = pika.BlockingConnection(QueueWrapper.params)
         QueueWrapper.channel = QueueWrapper.connection.channel()
         QueueWrapper.channel.basic_qos(prefetch_count=1)
         QueueWrapper.existing_queues = set()
@@ -36,30 +42,37 @@ class QueueWrapper:
                 QueueWrapper.existing_queues.add(name)
 
     @staticmethod
-    def subscribe_to_queue(callback, queue, no_ack=True):
+    def subscribe_to_queue(callback, queue, auto_ack=True):
         QueueWrapper.declare_queue(queue)
-        QueueWrapper.channel.basic_consume(callback,
-                                           queue=queue,
-                                           no_ack=no_ack)
+        QueueWrapper.channel.basic_consume(queue,
+                                           callback,
+                                           auto_ack=auto_ack)
 
     @staticmethod
     def send_message(queue, message):
-        QueueWrapper.declare_queue(queue)
-        QueueWrapper.channel.basic_publish(exchange='',
-                                           routing_key=queue,
-                                           body=message)
+        connection = pika.BlockingConnection(QueueWrapper.params)
+        QueueWrapper.publish_channel = connection.channel()
+        QueueWrapper.publish_channel.queue_declare(queue=queue)
+        logger.info(f"basic_publish: {queue}. {message}")
+        QueueWrapper.publish_channel.basic_publish(exchange='',
+                                                   routing_key=queue,
+                                                   body=message)
 
     @staticmethod
-    def clear_queue(queue):
-        QueueWrapper.channel.queue_purge(queue=queue)
+    def clear_queue(queue, is_publish=False):
+        if is_publish and QueueWrapper.publish_channel:
+            # QueueWrapper.publish_channel.queue_purge(queue=queue)
+            pass
+        else:
+            QueueWrapper.channel.queue_purge(queue=queue)
 
     @staticmethod
     def sleep(seconds):
         QueueWrapper.connection.sleep(seconds)
 
     @staticmethod
-    def start_consuming_workaround(channel):
-        while channel._consumer_infos:
+    def start_consuming_workaround(channel: BlockingChannel):
+        while channel.consumer_tags:
             channel.connection.process_data_events(time_limit=5)
 
     @staticmethod

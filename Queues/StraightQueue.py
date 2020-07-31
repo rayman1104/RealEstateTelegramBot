@@ -25,4 +25,4 @@ class StraightQueue:
 
         QueueWrapper.subscribe_to_queue(callback=req_callback,
                                         queue=queue_name,
-                                        no_ack=False)
+                                        auto_ack=False)

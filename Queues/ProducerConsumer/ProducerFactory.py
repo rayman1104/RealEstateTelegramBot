@@ -24,6 +24,6 @@ class ProducerFactory:
 
         QueueWrapper.subscribe_to_queue(callback=req_callback,
                                         queue=request_queue_name,
-                                        no_ack=False)
+                                        auto_ack=False)
 
 

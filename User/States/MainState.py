@@ -31,7 +31,7 @@ class MainState(BasicState):
 
     def send_invites(self):
         invites = InvitesManager.get_invites_list()
-        self.callback("\n".join(invites))
+        self.user.callback("\n".join(invites))
 
     def print_hello_message(self, invoke=False):
         self.user.callback(bot_strings.main_help)
