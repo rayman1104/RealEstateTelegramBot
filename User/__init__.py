@@ -146,7 +146,7 @@ class User:
                                                                    url=update['url']) + '\n'
         self.callback(message, parse_mode='Markdown', disable_web_page_preview=True)
         if len(new_links) > 0:
-            User.db.update_one(self.db_filter, {"$pushAll": {'received_links': list(new_links)}})
+            User.db.update_one(self.db_filter, {'$push': {'received_links': {'$each': list(new_links)}}})
 
     def pull_auth_message(self, message):
         self.messages_before_ignore_left -= 1
