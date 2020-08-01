@@ -165,18 +165,16 @@ station_added_message = "Станция {} добавлена."
 station_deleted_message = "Станция удалена."
 station_not_found_message = "Станция {} не найдена. Попробуйте ещё раз. /stop"
 
-base_for_sending_flat = """Адрес:
-Метро: {metro}
+base_for_sending_flat = """Метро: {metro}
 Адрес: {address}
 
-Информация:
 Объект: {object}
 Площади: {sizes_total}
 Этаж: {floor}
 
 Цена:
 {price} ({price_info})
-Процент: {percent}
+Этаж: {percent}
 
 Контакты:
 {contacts}
