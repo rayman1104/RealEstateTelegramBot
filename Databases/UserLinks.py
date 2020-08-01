@@ -12,7 +12,7 @@ class LinksDBManager:
     # Typical list entry:
     # {'id': <USER ID>, 'url': <URL>, 'tag': <TAG>,
     # 'frequency': <TIME in secs>,
-    # 'last_update': <Timestamp>
+    # 'last_update': <Timestamp>,
     # 'next_update': <Timestamp>,
     # 'type': <"CIAN", "Yandex", "Avito", etc.>}
     links_db = Databases.get_user_links_db()
@@ -59,7 +59,7 @@ class LinksDBManager:
 
     @staticmethod
     def get_expired_links():
-        if datetime.utcnow() >= LinksDBManager.next_estimated_link_update:
+        if LinksDBManager.links_db.count() and datetime.utcnow() >= LinksDBManager.next_estimated_link_update:
             logger.debug("Querying database for new links")
             LinksDBManager.next_estimated_link_update = None
             for update in list(LinksDBManager.links_db.find({'next_update': {"$lte": datetime.utcnow()}})):
