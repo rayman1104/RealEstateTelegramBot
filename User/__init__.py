@@ -118,7 +118,7 @@ class User:
                                                            object=offer['object'], sizes_total=sizes_info,
                                                            floor=offer['floor'], price=offer['price'][0],
                                                            price_info=offer['price'][2], percent=offer['fee'],
-                                                           contacts=offer['contacts'])
+                                                           contacts=offer.get('contacts'))
 
         url = self.callback.inline_url(bot_strings.go_to_flat_by_url_caption,
                                        offer['url'])
