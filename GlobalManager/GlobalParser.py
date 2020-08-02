@@ -16,7 +16,7 @@ logger = logging.getLogger("GlobalParser")
 
 
 class GlobalParser:
-    links_res = dict()
+    links_res = {}
     parse_request_function = None
     offers_send_function = None
     need_close = False

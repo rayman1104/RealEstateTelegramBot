@@ -5,7 +5,9 @@ volumes:
 
 services:
   all_moscow:
-    image: telegram_realty_all_moscow
+    build:
+      context: ./Docker/Dockerfiles
+      dockerfile: Dockerfile-all-Moscow
     restart: always
     volumes:
       - .:/source
@@ -13,7 +15,9 @@ services:
       - mongo
       - rabbit
   main:
-    image: telegram_realty_main
+    build:
+      context: ./Docker/Dockerfiles
+      dockerfile: Dockerfile-main
     restart: always
     volumes:
       - .:/source
@@ -21,7 +25,9 @@ services:
       - mongo
       - rabbit
   parser:
-    image: telegram_realty_parser
+    build:
+      context: ./Docker/Dockerfiles
+      dockerfile: Dockerfile-parser
     restart: always
     volumes:
       - .:/source
@@ -29,7 +35,9 @@ services:
       - mongo
       - rabbit
   updates_manager:
-    image: telegram_realty_updates_manager
+    build:
+      context: ./Docker/Dockerfiles
+      dockerfile: Dockerfile-updates-manager
     restart: always
     volumes:
       - .:/source
