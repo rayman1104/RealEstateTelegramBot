@@ -68,14 +68,14 @@ class GlobalParser:
                 GlobalParser.offers_send_function(message)
 
     @staticmethod
-    def link_parsed(info, result):
+    def link_parsed(info, result) -> bool:
         if not GlobalParser.need_close:
             if info in GlobalParser.links_res.keys():
                 GlobalParser.links_res[info] = True
             GlobalParser.flats_ids.extend(result)
             logger.debug("Parsed {} offers".format(len(result)))
-        else:
-            return False
+            return True
+        return False
 
     @staticmethod
     def safe_sleep(seconds):

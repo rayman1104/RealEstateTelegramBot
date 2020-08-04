@@ -5,6 +5,7 @@ from Queues import QueueWrapper
 from UpdatesManager import UpdatesManager
 
 
+@LoggerInit.catch_exceptions
 def main():
     LoggerInit.init_logging(config.log_update_manager_file)
     QueueWrapper.init()

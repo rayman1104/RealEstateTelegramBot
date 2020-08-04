@@ -28,6 +28,7 @@ def parse_url_callback(message, answer_callback):
     return True
 
 
+@LoggerInit.catch_exceptions
 def main():
     QueueWrapper.init()
     ProducerFactory.subscribe_producer(config.check_url_req_queue, config.check_url_ans_queue,

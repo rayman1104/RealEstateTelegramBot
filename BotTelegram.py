@@ -8,7 +8,9 @@ from TelegramAPI import Telegram
 from User import User
 from User.UserManager import UserManager
 
-if __name__ == "__main__":
+
+@LoggerInit.catch_exceptions
+def main():
     logger = LoggerInit.init_logging(config.log_file)
 
     logger.info('Application started')
@@ -43,5 +45,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.debug('QueueWrapper.close')
         QueueWrapper.close()
-    except Exception as e:
-        logger.error('Fatal error in main loop', exc_info=True)
+
+
+if __name__ == "__main__":
+    main()

@@ -4,7 +4,7 @@ from Queues import QueueWrapper, dump_object, load_object
 
 class ConsumerFactory:
     @staticmethod
-    def get_consumer(request_queue_name, answer_queue_name, answer_callback):
+    def get_consumer(request_queue_name: str, answer_queue_name: str, answer_callback):
         def raw_answer_callback(ch, method, properties, body):
             body = load_object(body)
             ack = answer_callback(body['id'], body['ans'])

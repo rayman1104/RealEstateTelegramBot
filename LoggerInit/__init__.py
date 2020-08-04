@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import functools
 import logging
 
 import config
@@ -25,3 +26,13 @@ def init_logging(log_filename):
     logger.addHandler(file_handler)
 
     return logger
+
+
+def catch_exceptions(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            logging.info(f"Uncaught exception, {e}", exc_info=e)
+    return wrapper

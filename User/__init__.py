@@ -127,12 +127,15 @@ class User:
 
     def new_links_acquired_event(self, updates_ids):
         logger.debug("Sending new offers to user " + str(self.user_id))
+        logger.debug(f'updated_ids: {updates_ids}')
         updates = FlatsDB.get_flats(updates_ids)
         received_links = set(User.db.find_one(self.db_filter)['received_links'])
+        logger.debug(f'received_links: {received_links}')
         new_links = set()
         required_updates = (x for x in updates if x['id'] not in received_links)
         message = ""
         for update in required_updates:
+            logger.debug(f'update: {update}')
             new_links.add(update['id'])
             if 'metro' in update['location']:
                 metro = update['location']['metro']

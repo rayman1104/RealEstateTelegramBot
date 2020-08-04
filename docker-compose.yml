@@ -54,6 +54,7 @@ services:
       # - /mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   rabbit:
     image: rabbitmq:3-management
+    restart: always
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"

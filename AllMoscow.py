@@ -13,7 +13,9 @@ from Queues.ProducerConsumer.ConsumerFactory import ConsumerFactory
 LoggerInit.init_logging(config.log_all_moscow_file)
 logger = logging.getLogger("AllMoscowParser")
 
-if __name__ == "__main__":
+
+@LoggerInit.catch_exceptions
+def main():
     QueueWrapper.init()
     GlobalParser.register()
     SuspiciousChecker.register()
@@ -25,3 +27,7 @@ if __name__ == "__main__":
         GlobalParser.close_thread()
         SuspiciousChecker.close_thread()
         QueueWrapper.close()
+
+
+if __name__ == "__main__":
+    main()
