@@ -19,6 +19,7 @@ import pytz
 
 table_cookies = {'serp_view_mode': 'table'}
 logger = logging.getLogger("CianParser")
+curr_proxy = 0
 
 
 def change_params(url, **kwargs):
@@ -40,21 +41,65 @@ def get_url_id():
     return datetime.datetime.now().strftime("%c")
 
 
-def get_url(url: str) -> Optional[bs]:
-    session = requests.Session()
-    retry = Retry(connect=3, backoff_factor=0.5)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    r = session.get(url, cookies=table_cookies)
-    if config.debug_cian:
-        location = 'url_responses/answer{}.html'.format(get_url_id())
-        os.makedirs(os.path.dirname(location), exist_ok=True)
-        with open(location, 'w') as f:
-            f.write(r.text)
-    if r.status_code != 200:
+def parse_proxies(proxy: str):
+    proxy = proxy.split(":")
+    if len(proxy) == 4:
+        proxies = {
+            "http": "socks5h://{}:{}@{}:{}".format(
+                proxy[2], proxy[3], proxy[0], proxy[1]
+            ),
+            "https": "socks5h://{}:{}@{}:{}".format(
+                proxy[2], proxy[3], proxy[0], proxy[1]
+            ),
+        }
+    else:
+        proxies = {
+            "http": "socks5h://{}:{}".format(proxy[0], proxy[1]),
+            "https": "socks5h://{}:{}".format(proxy[0], proxy[1]),
+        }
+    return proxies
+
+
+def parse_proxies_http(proxy: str):
+    proxy = proxy.split(":")
+    if len(proxy) == 4:
+        proxies = {
+            "http": "http://{}:{}@{}:{}".format(
+                proxy[2], proxy[3], proxy[0], 3000
+            ),
+            "https": "http://{}:{}@{}:{}".format(
+                proxy[2], proxy[3], proxy[0], 3000
+            ),
+        }
+    else:
+        proxies = {
+            "http": "http://{}:{}".format(proxy[0], 3000),
+            "https": "http://{}:{}".format(proxy[0], 3000),
+        }
+    return proxies
+
+
+def get_url(url: str, proxy: str = None) -> Optional[bs]:
+    try:
+        session = requests.Session()
+        if proxy:
+            session.proxies = parse_proxies(proxy)
+        retry = Retry(connect=3, backoff_factor=0.5)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        r = session.get(url, cookies=table_cookies)
+        if config.debug_cian:
+            location = 'url_responses/answer{}.html'.format(get_url_id())
+            os.makedirs(os.path.dirname(location), exist_ok=True)
+            with open(location, 'w') as f:
+                f.write(r.text)
+        if r.status_code != 200 or 'www.google.com/recaptcha' in r.text:
+            return None
+        return bs(r.text, 'lxml')
+    except Exception as e:
+        logger.debug(f'Proxy: {proxy}.\nCian connection error: {e}')
         return None
-    return bs(r.text, 'lxml')
 
 
 def get_raw_offers(bs_res: bs):
@@ -222,13 +267,14 @@ def check_not_found(page_bs: bs) -> bool:
 
 
 def check_url_correct(url: str) -> bool:
-    if cian_url in url:
-        try:
-            page_bs = get_url(change_params(url, totime=3000, p=1))
-            raw_offers = get_raw_offers(page_bs)
-            return True
-        except Exception:
-            return False
+    if cian_url not in url:
+        return False
+    try:
+        page_bs = safe_request(change_params(url, totime=3000, p=1))
+        raw_offers = get_raw_offers(page_bs)
+        return bool(len(raw_offers))
+    except Exception:
+        return False
 
 
 def get_new_offers(url, time=config.cian_default_timeout):
@@ -269,19 +315,27 @@ def get_count_of_offers(page_bs: bs) -> int:
 
 
 def safe_request(url) -> Optional[bs]:
+    global curr_proxy
     trials = 0
-    page_bs = None
-    while page_bs is None and trials < config.cian_trials_before_none:
-        page_bs = get_url(url)
-        if page_bs is not None:
-            return page_bs
-        logger.warning("Request wasn't successful!")
-        with open('request{0}.sav'.format(trials), 'w') as f:
-            f.write(str(page_bs))
-        time.sleep(2)
+    proxies_num = len(config.proxies_list)
+    page_bs = get_url(url)
+    if page_bs is not None:
+        logger.debug(f"Request was successful! (no proxy)")
+        return page_bs
+    logger.warning("Request wasn't successful! (no proxy)")
+    time.sleep(1)
+    while proxies_num and trials < config.cian_trials_before_none:
+        tmp_proxy = (curr_proxy - 1) % proxies_num
+        while curr_proxy != tmp_proxy:
+            page_bs = get_url(url, config.proxies_list[curr_proxy])
+            if page_bs is not None:
+                logger.debug(f"Request was successful! Proxy: {config.proxies_list[curr_proxy]}")
+                return page_bs
+            logger.warning(f"Request wasn't successful! #{curr_proxy}")
+            time.sleep(1)
+            curr_proxy = (curr_proxy + 1) % proxies_num
         trials += 1
-    logger.error("Total request didn't succeed :<")
-    return None
+    raise Exception("Total request didn't succeed :<")
 
 
 def get_offers(raw_url, url_time):

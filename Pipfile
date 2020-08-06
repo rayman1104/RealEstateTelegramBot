@@ -23,6 +23,7 @@ pytz = "*"
 traitlets = "*"
 pika = "*"
 ipython_genutils = "*"
+pysocks = "*"
 
 [requires]
 python_version = "3.8"
