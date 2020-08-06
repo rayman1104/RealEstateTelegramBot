@@ -52,8 +52,13 @@ default_invites_count = 10
 # CIAN parser
 cian_default_timeout = 7200
 cian_min_timeout = 7200
-cian_trials_before_none = 5
+cian_trials_before_none = 2
 debug_cian = False
+
+# CIAN proxies list
+proxies_list = [
+    # "127.0.0.1:3000:login:pass",
+]
 
 # Input awaitance time (seconds)
 awaitance = 120
