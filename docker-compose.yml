@@ -6,8 +6,8 @@ volumes:
 services:
   all_moscow:
     build:
-      context: ./Docker/Dockerfiles
-      dockerfile: Dockerfile-all-Moscow
+      context: .
+      dockerfile: Docker/all-moscow.dockerfile
     restart: always
     volumes:
       - .:/source
@@ -16,8 +16,8 @@ services:
       - rabbit
   main:
     build:
-      context: ./Docker/Dockerfiles
-      dockerfile: Dockerfile-main
+      context: .
+      dockerfile: Docker/main.dockerfile
     restart: always
     volumes:
       - .:/source
@@ -26,8 +26,8 @@ services:
       - rabbit
   parser:
     build:
-      context: ./Docker/Dockerfiles
-      dockerfile: Dockerfile-parser
+      context: .
+      dockerfile: Docker/parser.dockerfile
     restart: always
     volumes:
       - .:/source
@@ -36,8 +36,8 @@ services:
       - rabbit
   updates_manager:
     build:
-      context: ./Docker/Dockerfiles
-      dockerfile: Dockerfile-updates-manager
+      context: .
+      dockerfile: Docker/updates-manager.dockerfile
     restart: always
     volumes:
       - .:/source
@@ -51,7 +51,6 @@ services:
       - "127.0.0.1:27018:27017"
     volumes:
       - mongo_data:/data/db
-      # - /mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   rabbit:
     image: rabbitmq:3-management
     restart: always
