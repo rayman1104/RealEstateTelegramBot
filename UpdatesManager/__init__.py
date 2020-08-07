@@ -3,6 +3,7 @@ import threading
 import logging
 
 import time
+from typing import List, Callable, Dict
 
 import config
 from Databases.UserLinks import LinksDBManager
@@ -14,11 +15,11 @@ logger.setLevel(logging.DEBUG)
 
 
 class UpdatesManager:
-    link_update_request_function = None
-    links_send_function = None
+    link_update_request_function: Callable[[dict, any], None] = None
+    links_send_function: Callable[[dict], None] = None
 
     @staticmethod
-    def link_updated_result(info, new_links):
+    def link_updated_result(info: dict, new_links: List[int]) -> None:
         message = {
             'uid': info['uid'],
             'offers': new_links,
@@ -35,10 +36,9 @@ class UpdatesManager:
 
             for link in LinksDBManager.get_expired_links():
                 logger.debug("Parsing offers for user " + str(link['id']))
-                user_info = link['id']
-                UpdatesManager.link_update_request_function({'uid': user_info}, {'url': link['url'],
-                                                                                 'time': max(config.cian_min_timeout,
-                                                                                             link['frequency'] * 60)})
+                timeout = max(config.cian_min_timeout, link['frequency'] * 60)
+                UpdatesManager.link_update_request_function({'uid': link['id']},
+                                                            {'url': link['url'], 'time': timeout})
 
     @staticmethod
     def init_manager():
@@ -50,4 +50,3 @@ class UpdatesManager:
             UpdatesManager.link_updated_result)
 
         UpdatesManager.links_send_function = StraightQueue.get_sender(config.new_offers_queue)
-

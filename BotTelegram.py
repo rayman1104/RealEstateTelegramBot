@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import LoggerInit
-from Databases import Databases
 import config
 from Queues import QueueWrapper
 from TelegramAPI import Telegram
@@ -20,7 +19,7 @@ def main():
     User.init()
     QueueWrapper.start(detach=True)
     try:
-        for query in bot.get_updates():
+        for _ in bot.get_updates():
             pass
         while True:
             logger.debug("Getting updates")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from typing import Optional
+from typing import Optional, TypedDict, Iterable
 from urllib.parse import urlparse, parse_qs, urlencode
 
 import logging
@@ -82,6 +82,7 @@ def parse_proxies_http(proxy: str):
 def get_url(url: str, proxy: str = None) -> Optional[bs]:
     try:
         session = requests.Session()
+        # session.cookies.update({"anti_bot": "xxxx"})
         if proxy:
             session.proxies = parse_proxies(proxy)
         retry = Retry(connect=3, backoff_factor=0.5)
@@ -135,7 +136,7 @@ months = ["январь", "февраль", "март", "апрель", "мая"
           "ноябрь", "декабрь"]
 
 
-def parse_time(date, time):
+def parse_time(date: str, time_str: str) -> datetime:
     current_time = datetime.datetime.now(timezone)
     if date == 'сегодня':
         date = current_time.date()
@@ -155,10 +156,10 @@ def parse_time(date, time):
                 break
         date = datetime.date(year=year, day=day, month=month)
 
-    time = [int(i) for i in time.split(':')]
-    time = datetime.time(hour=time[0], minute=time[1])
+    parsed_time = [int(i) for i in time_str.split(':')]
+    parsed_time = datetime.time(hour=parsed_time[0], minute=parsed_time[1])
 
-    return datetime.datetime.combine(date=date, time=time)
+    return datetime.datetime.combine(date=date, time=parsed_time)
 
 
 def parse_raw_offer(offer: bs) -> dict:
@@ -277,6 +278,12 @@ def check_url_correct(url: str) -> bool:
         return False
 
 
+class Offer(TypedDict):
+    id: int
+    suspicious: bool
+    seen_by_suspicious_validator: bool
+
+
 def get_new_offers(url, time=config.cian_default_timeout):
     db = Databases.get_flats_db()
     ids = {}
@@ -338,7 +345,7 @@ def safe_request(url) -> Optional[bs]:
     raise Exception("Total request didn't succeed :<")
 
 
-def get_offers(raw_url, url_time):
+def get_offers(raw_url: str, url_time: int) -> Iterable[Offer]:
     url = change_params(raw_url, totime=url_time, p=1)
     page_bs = safe_request(url)
     # Получаем число предложений

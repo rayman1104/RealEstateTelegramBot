@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 import logging
-
 import time
-
 import string
+from typing import Callable, List
+import threading
 
 import config
 from Databases import Databases
 from Queues import QueueWrapper
 from Queues.ProducerConsumer.ConsumerFactory import ConsumerFactory
 from Queues.StraightQueue import StraightQueue
-import threading
 
 logger = logging.getLogger("GlobalParser")
 
 
 class GlobalParser:
     links_res = {}
-    parse_request_function = None
-    offers_send_function = None
+    parse_request_function: Callable[[int, dict], None] = None
+    offers_send_function: Callable[[dict], None] = None
     need_close = False
-    thread = None
-    flats_ids = []
+    thread: threading.Thread = None
+    flats_ids: List[int] = []
 
     @staticmethod
     def fix_price(flat):

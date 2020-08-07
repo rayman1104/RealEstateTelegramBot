@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import TypedDict, Callable, Optional
+
 import LoggerInit
 import config
 from Parsers import CianParser
@@ -8,7 +10,16 @@ from Queues.ProducerConsumer.ProducerFactory import ProducerFactory
 logger = LoggerInit.init_logging(config.log_parser_file)
 
 
-def check_url_callback(message, answer_callback):
+class CheckUrlMessage(TypedDict):
+    url: str
+
+
+class ParseUrlMessage(TypedDict):
+    url: str
+    time: Optional[int]
+
+
+def check_url_callback(message: CheckUrlMessage, answer_callback: Callable[[any], None]) -> bool:
     url = message['url']
     logger.info("Checking url: {}".format(url))
     result = CianParser.check_url_correct(url)
@@ -16,7 +27,7 @@ def check_url_callback(message, answer_callback):
     return True
 
 
-def parse_url_callback(message, answer_callback):
+def parse_url_callback(message: ParseUrlMessage, answer_callback: Callable[[any], None]) -> bool:
     url = message['url']
     if 'time' in message.keys():
         time = message['time']

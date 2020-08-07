@@ -1,14 +1,11 @@
 import LoggerInit
 import config
-import pytz
-from datetime import datetime
 import time
 import logging
 
 from GlobalManager.GlobalParser import GlobalParser
 from GlobalManager.SuspiciousChecker import SuspiciousChecker
 from Queues import QueueWrapper
-from Queues.ProducerConsumer.ConsumerFactory import ConsumerFactory
 
 LoggerInit.init_logging(config.log_all_moscow_file)
 logger = logging.getLogger("AllMoscowParser")

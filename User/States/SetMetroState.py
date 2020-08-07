@@ -63,7 +63,7 @@ class SetMetroState(BasicState):
         if len(good_stations) > config.max_inline_answers:
             good_stations = good_stations[:config.max_inline_answers]
         result = [BasicInlineResult(answer_id='station_{}_{}'.format(i, station),
-                                    resulted_text=station,
+                                    result_text=station,
                                     answer_title=station) for i, station in enumerate(good_stations)]
         answer = InlineAnswer(inline_query, result)
         answer.personal = True

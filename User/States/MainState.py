@@ -73,7 +73,7 @@ class MainState(BasicState):
             answers = [BasicInlineResult(answer_id='invoke_invite_{}'.format(i),
                                          answer_title='Invite {}'.format(i),
                                          answer_description=invite,
-                                         resulted_text=invite)
+                                         result_text=invite)
                        for i, invite in enumerate(invites, start=1)]
             answer = InlineAnswer(inline_query, answers)
             answer.personal = True

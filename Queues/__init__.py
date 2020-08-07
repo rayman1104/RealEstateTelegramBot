@@ -49,7 +49,7 @@ class QueueWrapper:
                                            auto_ack=auto_ack)
 
     @staticmethod
-    def send_message(queue, message):
+    def send_message(queue: str, message: bytes):
         connection = pika.BlockingConnection(QueueWrapper.params)
         QueueWrapper.publish_channel = connection.channel()
         QueueWrapper.publish_channel.queue_declare(queue=queue)
@@ -99,11 +99,11 @@ class QueueWrapper:
         QueueWrapper.connection = None
 
 
-def dump_object(obj):
+def dump_object(obj: dict):
     return json.dumps(obj, separators=(',', ':'))
 
 
-def load_object(obj_string):
+def load_object(obj_string: bytes) -> dict:
     if isinstance(obj_string, bytes):
         obj_string = obj_string.decode('utf-8')
     return json.loads(obj_string)

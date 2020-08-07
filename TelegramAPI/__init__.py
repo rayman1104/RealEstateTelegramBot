@@ -5,7 +5,6 @@ import logging
 import config
 import requests
 
-base_url = 'https://api.telegram.org/bot{api_key}/{method}'
 logger = logging.getLogger('telegram')
 logger.setLevel(logging.DEBUG)
 
@@ -14,14 +13,13 @@ def request(api_key, method_name, **kwargs):
     request_timeout = 30
     if 'timeout' in kwargs:
         request_timeout = 2 * int(kwargs['timeout'])
-    kwargs = {key: json.dumps(value) if isinstance(value, (dict, list, tuple, set))
-    else value for key, value in kwargs.items()}
+    kwargs = {
+        key: json.dumps(value) if isinstance(value, (dict, list, tuple, set))
+        else value for key, value in kwargs.items()
+    }
     try:
         req = requests.post(
-            'https://api.telegram.org/bot{api_key}/{method}'.format(
-                api_key=api_key,
-                method=method_name
-            ),
+            f'https://api.telegram.org/bot{api_key}/{method_name}',
             kwargs,
             timeout=request_timeout
         )
@@ -34,33 +32,33 @@ class UserBlocked(Exception):
     pass
 
 
-def check_errors(request):
-    if not request.json()['ok']:
-        js = request.json()
-        if request.status_code == 403 or js['error_code'] == 403:
+def check_errors(req):
+    if not req.json()['ok']:
+        js = req.json()
+        if req.status_code == 403 or js['error_code'] == 403:
             raise UserBlocked('User blocked the bot')
         raise Exception(
             'Telegram request \'ok\' field is not True.\n Resulted status code: {}.\n Description: {}'.format(
                 js['error_code'],
                 js['description']))
-    if request.status_code != 200:
-        raise Exception('Telegram request code was not OK. Resulted code: {}'.format(request.status_code))
+    if req.status_code != 200:
+        raise Exception('Telegram request code was not OK. Resulted code: {}'.format(req.status_code))
 
 
-def safe_request(api_key, method_name, **wargs):
-    r = request(api_key, method_name, **wargs)
+def safe_request(api_key, method_name, **kwargs):
+    r = request(api_key, method_name, **kwargs)
     check_errors(r)
     return r.json()['result']
 
 
 class BasicInlineResult:
-    def __init__(self, answer_id, answer_title, resulted_text, answer_description=None):
+    def __init__(self, answer_id, answer_title, result_text, answer_description=None):
         self.element = {
             'type': 'article',
             'id': str(answer_id),
             'title': str(answer_title),
             'input_message_content': {
-                'message_text': str(resulted_text)
+                'message_text': str(result_text)
             }
         }
         if answer_description is not None:

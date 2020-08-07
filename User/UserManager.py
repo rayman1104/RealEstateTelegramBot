@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import Callable
+import threading
 
 import config
 from Queues.ProducerConsumer.ConsumerFactory import ConsumerFactory
 from Queues.StraightQueue import StraightQueue
+from TelegramAPI import Telegram
 from . import User
-import threading
 
 logger = logging.getLogger("UserManager")
 
 
 class UserManager:
-    link_check_request_function = None
-    users_dict = dict()
+    link_check_request_function: Callable[[dict, dict], None] = None
+    users_dict = {}
     dict_lock = threading.Lock()
-    bot = None
+    bot: Telegram = None
 
     @staticmethod
     def link_check_acquired(info, result):
@@ -40,7 +42,7 @@ class UserManager:
         user.new_links_acquired_event(new_links)
 
     @staticmethod
-    def init(bot):
+    def init(bot: Telegram):
         UserManager.bot = bot
         UserManager.link_check_request_function = ConsumerFactory.get_consumer(
             config.check_url_req_queue,
@@ -56,7 +58,7 @@ class UserManager:
                 del UserManager.users_dict[user_id]
 
     @staticmethod
-    def get_or_create_user(user_id):
+    def get_or_create_user(user_id: int) -> User:
         with UserManager.dict_lock:
             if user_id in UserManager.users_dict:
                 return UserManager.users_dict[user_id]
