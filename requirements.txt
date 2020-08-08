@@ -16,3 +16,4 @@ pytz
 traitlets
 pika
 pysocks
+lxml

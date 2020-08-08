@@ -7,8 +7,8 @@ services:
   all_moscow:
     build:
       context: .
-      dockerfile: Docker/all-moscow.dockerfile
     restart: always
+    command: python3 AllMoscow.py
     volumes:
       - .:/source
     depends_on:
@@ -17,8 +17,8 @@ services:
   main:
     build:
       context: .
-      dockerfile: Docker/main.dockerfile
     restart: always
+    command: python3 BotTelegram.py
     volumes:
       - .:/source
     depends_on:
@@ -27,8 +27,8 @@ services:
   parser:
     build:
       context: .
-      dockerfile: Docker/parser.dockerfile
     restart: always
+    command: python3 CianParserMain.py
     volumes:
       - .:/source
     depends_on:
@@ -37,8 +37,8 @@ services:
   updates_manager:
     build:
       context: .
-      dockerfile: Docker/updates-manager.dockerfile
     restart: always
+    command: python3 UpdatesManagerMain.py
     volumes:
       - .:/source
     depends_on:
